@@ -1,0 +1,108 @@
+<!DOCTYPE html><html><head><style type="text/css">
+
+  html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; }
+  canvas { box-shadow: 5px 0px 10px gray; }
+
+</style></head><body><canvas id="canvas"></canvas><script src='http://joeiddon.github.io/perlin/perlin.js'></script><script>
+
+//
+// Variables.
+//
+const w = 500
+const h = 500
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+const cells = createGrid(40, 40)
+const margin = 25
+
+//
+// Init canvas.
+//
+createCanvas()
+createCircles()
+
+/**
+ * Create canvas.
+ */
+function createCanvas() {
+  canvas.height = h
+  canvas.width = w
+}
+
+/**
+ * Draw circles.
+ */
+function createCircles() {
+  cells.filter(() => Math.random() > 0.5).forEach(({
+    position: [u, v],
+    radius,
+    color,
+    rotation
+  }) => {
+    const x = lerp(margin, w - margin, u)
+    const y = lerp(margin, h - margin + 50, v)
+    ctx.save()
+    ctx.fillStyle = color
+    ctx.font = `${radius * w}px "Arial"`
+    ctx.translate(x, y)
+    ctx.rotate(rotation)
+    ctx.fillText('=', 0, 0)
+    ctx.restore()
+  })
+}
+
+/**
+ * Create a list of grid coordinates.
+ */
+function createGrid(cols = 1, rows = 1) {
+  const cells = []
+  const colorCount = Math.floor(Math.random() * (4 - 2 + 1) + 2)
+  const palette = shuffle(getColorPalette()).slice(0, colorCount)
+  for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < rows; y++) {
+      const u = cols <= 1 ? 0.5 : x / (cols - 1)
+      const v = rows <= 1 ? 0.5 : y / (rows - 1)
+      cells.push({
+        radius: Math.abs(perlin.get(u, v)) * 0.4,
+        position: [ u, v ],
+        color: palette[Math.floor(Math.random() * palette.length)],
+        rotation: perlin.get(u, v) * 2.5
+      })
+    }
+  }
+  return cells
+}
+
+/**
+ * Create margin from canvas edge.
+ */
+function lerp(min, max, t) {
+  return min * (1 - t) + max * t
+}
+
+/**
+ * Get a random color palette.
+ */
+function getColorPalette() {
+  const palettes = [
+    ["#6b4b3e","#c49e85","#ffd6af","#f8f4f9","#bea7e5"],
+    ["#c1f7dc","#c3d2d5","#bda0bc","#a2708a","#824670"],
+    ["#17bebb","#2e282a","#cd5334","#edb88b","#fad8d6"],
+    ["#44af69","#f8333c","#fcab10","#2b9eb3","#dbd5b5"],
+  ]
+  return palettes[Math.floor(Math.random() * palettes.length)]
+}
+
+/**
+ * Shuffles array in place.
+ * @param {Array} a containing the items.
+ */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+</script></body></html>
